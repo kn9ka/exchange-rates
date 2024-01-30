@@ -26,5 +26,4 @@
 		height: 100%;
 		background-color: theme(colors.slate.900);
 	}
-
 </style>
