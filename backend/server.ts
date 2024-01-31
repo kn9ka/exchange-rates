@@ -13,7 +13,7 @@ const appService = require("./app.ts");
 app.register(appService);
 
 const GRACE_DELAY = Number(process.env.FASTIFY_CLOSE_GRACE_DELAY) || 500;
-const SERVER_PORT = Number(process.env.PORT) || 3000;
+const SERVER_PORT = Number(process.env.SERVER_PORT) || 3000;
 
 const closeListeners = closeWithGrace(
   { delay: GRACE_DELAY },

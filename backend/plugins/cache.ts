@@ -2,7 +2,7 @@
 
 import { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
-import fastifyCaching, { AbstractCacheCompliantObject } from "@fastify/caching";
+import fastifyCaching from "@fastify/caching";
 
 export const cache = require("abstract-cache")({
   useAwait: true,

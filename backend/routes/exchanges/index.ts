@@ -1,17 +1,15 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
+
 import {
   CoronaExchange,
-  Currency as CoronaCurrency,
-} from "../../services/exchanges/corona";
-import {
+  CoronaCurrency,
   ContactExchange,
-  Currency as ContactCurrency,
-} from "../../services/exchanges/contact";
-import {
+  ContactCurrency,
   CBRExchange,
-  Currency as CBRCurrency,
-} from "../../services/exchanges/cbr";
+  CBRCurrency,
+  ExchangeServiceName,
+} from "../../services/exchanges";
 
 const contactService = new ContactExchange();
 const coronaService = new CoronaExchange();
@@ -21,6 +19,12 @@ export const ratesSchema = {
   response: {
     200: z.record(z.record(z.number().nullable())),
   } as const,
+};
+
+export const servicesSchema = {
+  response: {
+    200: z.array(z.string()),
+  },
 };
 
 const router = async (fastify: FastifyInstance) => {
@@ -39,13 +43,13 @@ const router = async (fastify: FastifyInstance) => {
           CoronaCurrency.RUB,
           CoronaCurrency.USD
         ),
-        EUR: await coronaService.getExchangeRate(
-          CoronaCurrency.RUB,
-          CoronaCurrency.EUR
-        ),
         GEL: await coronaService.getExchangeRate(
           CoronaCurrency.RUB,
           CoronaCurrency.GEL
+        ),
+        EUR: await coronaService.getExchangeRate(
+          CoronaCurrency.RUB,
+          CoronaCurrency.EUR
         ),
       },
       contact: {
@@ -60,14 +64,18 @@ const router = async (fastify: FastifyInstance) => {
       },
       cbr: {
         USD: await cbrService.getExchangeRate(CBRCurrency.RUB, CBRCurrency.USD),
-        EUR: await cbrService.getExchangeRate(CBRCurrency.RUB, CBRCurrency.EUR),
         GEL: await cbrService.getExchangeRate(CBRCurrency.RUB, CBRCurrency.GEL),
+        EUR: await cbrService.getExchangeRate(CBRCurrency.RUB, CBRCurrency.EUR),
       },
     };
 
-    await fastify.cache.set("rates", rates, 1000 * 60);
+    await fastify.cache.set("rates", rates, 1000 * 60 * 10);
 
     reply.send(rates);
+  });
+
+  provider.get("/services", { schema: servicesSchema }, async (_, reply) => {
+    reply.send(Object.values(ExchangeServiceName));
   });
 };
 
