@@ -1,22 +1,26 @@
 <script lang="ts">
 	export let cardName: string = '';
+	export let rates: Record<string, number>;
 	export let isLoading: boolean = false;
 </script>
 
 <div
-	class="relative flex w-fit cursor-pointer flex-col items-center justify-center rounded-md bg-slate-700 p-6"
+	class="no-wrap relative flex w-full max-w-36 cursor-pointer flex-col items-center rounded-md bg-slate-700 p-4"
 >
-	<div class="mb-2 text-nowrap">
-		<span class="font-bold">{cardName}</span>
+	<div class="mb-3 text-nowrap text-center">
+		<span class="font-bold">{cardName.charAt(0).toUpperCase() + cardName.slice(1)}</span>
 	</div>
-	<div class="font-sans">
-		<span class="font-medium">GEL</span>
-		<span>37.4</span>
-	</div>
-	<div class="font-sans">
-		<span>USD</span>
-		<span>99.7</span>
-	</div>
+	{#if Object.keys(rates).length > 0}
+		<div class="">
+			{#each Object.entries(rates) as [currencyName, rate]}
+				<div class="font-sans">
+					<span class="font-medium">{currencyName}</span>
+					<span>{rate}</span>
+				</div>
+			{/each}
+		</div>
+	{/if}
+
 	{#if isLoading}
 		<div class="absolute right-1 top-1 animate-spin">
 			<svg
