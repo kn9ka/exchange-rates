@@ -54,5 +54,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port:
           script: |
-            docker pull knyaka/exchange-rates
+            docker pull knyaka/exchange-rates:main
             docker run -p -d 3000:3000 knyaka/exchange-rates:main
