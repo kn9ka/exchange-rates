@@ -55,4 +55,6 @@ jobs:
           port:
           script: |
             docker pull knyaka/exchange-rates:main
-            docker run -p -d 3000:3000 knyaka/exchange-rates:main
+            docker stop backend
+            docker remove backend
+            docker run -d -p 3000:3000 --name backend knyaka/exchange-rates:main
