@@ -9,7 +9,7 @@ const app: FastifyInstance = Fastify({
   logger: true,
 });
 
-const appService = require("./app.ts");
+const appService = require("./app");
 app.register(appService);
 
 const GRACE_DELAY = Number(process.env.FASTIFY_CLOSE_GRACE_DELAY) || 500;
@@ -30,7 +30,9 @@ app.addHook("onClose", (_, done) => {
   done();
 });
 
-app.listen({ port: SERVER_PORT }, (err) => {
+app.listen({ port: SERVER_PORT, host: "0.0.0.0" }, (err) => {
+  console.log("Server listening on port " + SERVER_PORT);
+
   if (err) {
     app.log.error(err);
     process.exit(1);
