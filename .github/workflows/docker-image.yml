@@ -53,7 +53,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port:
-          script: whoami
-          # script: |
-          #   docker pull knyaka/exchange-rates
-          #   docker run -p 3000:3000 knyaka/exchange-rates:main
+          script: |
+            docker pull knyaka/exchange-rates
+            docker run -p 3000:3000 knyaka/exchange-rates:main
