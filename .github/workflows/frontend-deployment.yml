@@ -1,0 +1,63 @@
+name: Frontend deployment
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: knyaka/exchange-rates
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: "./frontend"
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            knyaka/exchange-rates-frontend
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port:
+          script: |
+            docker pull knyaka/exchange-rates-frontend:latest
+            docker stop frontend
+            docker remove frontend
+            docker run -d -p 8080:80 --name frontend knyaka/exchange-rates-frontend
