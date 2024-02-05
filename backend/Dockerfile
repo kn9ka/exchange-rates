@@ -1,4 +1,4 @@
-FROM node:20.11.0-alpine as node-package
+FROM node:21.6.1-alpine as node-package
 
 
 WORKDIR /app
