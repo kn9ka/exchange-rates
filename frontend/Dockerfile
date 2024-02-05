@@ -1,6 +1,5 @@
 FROM node:20.11.0-alpine as build
 
-# ARG REACT_APP_SERVICES_HOST=/services/m
 
 WORKDIR /app
 

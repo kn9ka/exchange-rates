@@ -1,8 +1,27 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	type ExchangeRate = Record<string, number>;
+	type RatesResponse = Record<string, ExchangeRate>;
 	import ExchangeCard from '../components/ExchangeCard/ExchangeCard.svelte';
+	import { onMount } from 'svelte';
+	import { ratesStore } from './store';
 
-	export let data: PageData;
+	let rates: RatesResponse = {};
+	ratesStore.subscribe((items) => (rates = items));
+
+	console.log(process.env.NODE_ENV);
+
+	const load = async (): Promise<RatesResponse> => {
+		const response = await fetch(`http://localhost:3000/exchanges/rates`);
+		if (!response.ok) {
+			// @TODO: do stuff
+			console.error('something went wrong');
+		}
+		return await response.json();
+	};
+
+	onMount(async () => {
+		ratesStore.set(await load());
+	});
 </script>
 
 <svelte:head>
@@ -12,8 +31,8 @@
 
 <section class="flex h-full flex-1 flex-col justify-center">
 	<div class="flex h-full flex-wrap place-content-center gap-4">
-		{#each Object.entries(data) as [name, rates]}
-			<ExchangeCard cardName={name} {rates} />
+		{#each Object.entries(rates) as [name, exchangeRates]}
+			<ExchangeCard cardName={name} rates={exchangeRates} />
 		{/each}
 	</div>
 </section>
