@@ -40,7 +40,8 @@ jobs:
           context: "./backend"
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            knyaka/exchange-rates-backend
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
@@ -56,7 +57,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port:
           script: |
-            docker pull knyaka/exchange-rates:main
+            docker pull knyaka/exchange-rates-backend:latest
             docker stop backend
             docker remove backend
-            docker run -d -p 3000:3000 --name backend knyaka/exchange-rates:main
+            docker run -d -p 3000:3000 --name backend knyaka/exchange-rates-backend:latest
