@@ -8,10 +8,9 @@
 	let rates: RatesResponse = {};
 	ratesStore.subscribe((items) => (rates = items));
 
-	console.log(process.env.NODE_ENV);
-
 	const load = async (): Promise<RatesResponse> => {
-		const response = await fetch(`api/exchanges/rates`);
+		const prefix = process.env.NODE_ENV !== 'production' ? 'http://localhost:3000/' : '';
+		const response = await fetch(`${prefix}api/exchanges/rates`);
 		if (!response.ok) {
 			// @TODO: do stuff
 			console.error('something went wrong');
@@ -29,7 +28,7 @@
 	<meta name="description" content="Exchange rates" />
 </svelte:head>
 
-<section class="flex h-full flex-1 flex-col justify-center">
+<section class="flex h-full flex-1 flex-col justify-center gap-4">
 	<div class="flex h-full flex-wrap place-content-center gap-4">
 		{#each Object.entries(rates) as [name, exchangeRates]}
 			<ExchangeCard cardName={name} rates={exchangeRates} />
