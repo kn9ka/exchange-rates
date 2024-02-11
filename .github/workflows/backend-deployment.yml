@@ -60,4 +60,4 @@ jobs:
             docker pull knyaka/exchange-rates-backend:latest
             docker stop backend
             docker remove backend
-            docker run -d -p 3000:3000 --net bridge --name backend knyaka/exchange-rates-backend:latest
+            docker run -d -p 3000:3000 --name backend knyaka/exchange-rates-backend:latest
