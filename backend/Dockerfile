@@ -20,7 +20,7 @@ FROM node-package as node-prod
 
 WORKDIR /app
 
-FROM node:16-alpine
+FROM node:21.6.1-alpine
 
 WORKDIR /app
 

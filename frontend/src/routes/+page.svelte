@@ -11,7 +11,7 @@
 	console.log(process.env.NODE_ENV);
 
 	const load = async (): Promise<RatesResponse> => {
-		const response = await fetch(`http://localhost:3000/exchanges/rates`);
+		const response = await fetch(`api/exchanges/rates`);
 		if (!response.ok) {
 			// @TODO: do stuff
 			console.error('something went wrong');

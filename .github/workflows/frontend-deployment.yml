@@ -60,4 +60,4 @@ jobs:
             docker pull knyaka/exchange-rates-frontend:latest
             docker stop frontend
             docker remove frontend
-            docker run -d -p 80:80 --name frontend knyaka/exchange-rates-frontend
+            docker run -d -p 80:80 --net bridge --name frontend knyaka/exchange-rates-frontend

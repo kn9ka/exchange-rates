@@ -37,41 +37,57 @@ const router = async (fastify: FastifyInstance) => {
       return reply.send(cached.item);
     }
 
-    const rates = {
-      corona: {
-        USD: await coronaService.getExchangeRate(
-          CoronaCurrency.RUB,
-          CoronaCurrency.USD
-        ),
-        GEL: await coronaService.getExchangeRate(
-          CoronaCurrency.RUB,
-          CoronaCurrency.GEL
-        ),
-        EUR: await coronaService.getExchangeRate(
-          CoronaCurrency.RUB,
-          CoronaCurrency.EUR
-        ),
-      },
-      contact: {
-        USD: await contactService.getExchangeRate(
-          ContactCurrency.RUB,
-          ContactCurrency.USD
-        ),
-        GEL: await contactService.getExchangeRate(
-          ContactCurrency.RUB,
-          ContactCurrency.GEL
-        ),
-      },
-      cbr: {
-        USD: await cbrService.getExchangeRate(CBRCurrency.RUB, CBRCurrency.USD),
-        GEL: await cbrService.getExchangeRate(CBRCurrency.RUB, CBRCurrency.GEL),
-        EUR: await cbrService.getExchangeRate(CBRCurrency.RUB, CBRCurrency.EUR),
-      },
-    };
+    try {
+      const rates = {
+        corona: {
+          USD: await coronaService.getExchangeRate(
+            CoronaCurrency.RUB,
+            CoronaCurrency.USD
+          ),
+          GEL: await coronaService.getExchangeRate(
+            CoronaCurrency.RUB,
+            CoronaCurrency.GEL
+          ),
+          EUR: await coronaService.getExchangeRate(
+            CoronaCurrency.RUB,
+            CoronaCurrency.EUR
+          ),
+        },
+        contact: {
+          USD: await contactService.getExchangeRate(
+            ContactCurrency.RUB,
+            ContactCurrency.USD
+          ),
+          GEL: await contactService.getExchangeRate(
+            ContactCurrency.RUB,
+            ContactCurrency.GEL
+          ),
+        },
+        cbr: {
+          USD: await cbrService.getExchangeRate(
+            CBRCurrency.RUB,
+            CBRCurrency.USD
+          ),
+          GEL: await cbrService.getExchangeRate(
+            CBRCurrency.RUB,
+            CBRCurrency.GEL
+          ),
+          EUR: await cbrService.getExchangeRate(
+            CBRCurrency.RUB,
+            CBRCurrency.EUR
+          ),
+        },
+      };
 
-    await fastify.cache.set("rates", rates, 1000 * 60 * 10);
+      await fastify.cache.set("rates", rates, 1000 * 60 * 10);
 
-    reply.send(rates);
+      reply.send(rates);
+    } catch (err) {
+      if (err instanceof Error) {
+        // @ts-ignore
+        reply.send(err.message);
+      }
+    }
   });
 
   provider.get("/services", { schema: servicesSchema }, async (_, reply) => {
