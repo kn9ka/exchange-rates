@@ -17,7 +17,7 @@ const cbrService = new CBRExchange();
 
 export const ratesSchema = {
   response: {
-    200: z.record(z.record(z.number().nullable())),
+    200: z.record(z.record(z.number().nullable().optional())),
   } as const,
 };
 
@@ -32,14 +32,14 @@ const router = async (fastify: FastifyInstance) => {
 
   provider.get("/rates", { schema: ratesSchema }, async (_, reply) => {
     // @TODO: fix any
-    const cached = await fastify.abscache.get<any>("rates");
-    if (cached) {
-      return reply.send(cached.item);
-    }
+    // const cached = await fastify.abscache.get<any>("rates");
+    // if (cached) {
+    //   return reply.send(cached.item);
+    // }
 
     try {
       const rates = {
-        corona: {
+        [coronaService.NAME]: {
           USD: await coronaService.getExchangeRate(
             CoronaCurrency.RUB,
             CoronaCurrency.USD
@@ -53,7 +53,7 @@ const router = async (fastify: FastifyInstance) => {
             CoronaCurrency.EUR
           ),
         },
-        contact: {
+        [contactService.NAME]: {
           USD: await contactService.getExchangeRate(
             ContactCurrency.RUB,
             ContactCurrency.USD
@@ -63,7 +63,7 @@ const router = async (fastify: FastifyInstance) => {
             ContactCurrency.GEL
           ),
         },
-        cbr: {
+        [cbrService.NAME]: {
           USD: await cbrService.getExchangeRate(
             CBRCurrency.RUB,
             CBRCurrency.USD

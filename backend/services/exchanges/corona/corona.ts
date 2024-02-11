@@ -12,6 +12,7 @@ const DEFAULT_SEARCH_PARAMS = {
 export class CoronaExchange extends Exchange {
   SITE_URL = "https://koronapay.com";
   API_URL = `${this.SITE_URL}/transfers/online/api/transfers/tariffs`;
+  NAME = "Золотая корона";
 
   private parseRate(rate: number) {
     return Number(rate.toFixed(2));

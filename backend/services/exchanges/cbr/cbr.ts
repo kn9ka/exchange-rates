@@ -6,6 +6,7 @@ const parser = new XMLParser();
 
 export class CBRExchange extends Exchange {
   API_URL = "http://www.cbr.ru/scripts/XML_daily.asp";
+  NAME = "ЦБ РФ";
 
   private parseRate(rate: string) {
     return Number(parseFloat(rate.replace(",", ".")).toFixed(2));

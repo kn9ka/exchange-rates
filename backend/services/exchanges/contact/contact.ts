@@ -16,6 +16,7 @@ export class ContactExchange extends Exchange {
   API_URL = `${this.SITE_URL}/api/contact/v2`;
   DEFAULT_AMOUNT = "100.00";
   formId: string | null = null;
+  NAME = "Контакт";
 
   private cleanCookies(cookies: string) {
     const TAIL_REFREST_TOKEN_REGEX = /tokenTailRefresh2=([^;]+)/;
