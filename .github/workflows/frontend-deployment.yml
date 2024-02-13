@@ -60,4 +60,4 @@ jobs:
             docker pull knyaka/exchange-rates-frontend:latest
             docker stop frontend
             docker remove frontend
-            docker run -d -p 80:80 --name frontend knyaka/exchange-rates-frontend
+            docker run -d -p 80:80 -p 443:443 -v /etc/letsencrypt/archive/knyaka.dev/:/etc/nginx/ssl/live/knyaka.dev/ --name frontend knyaka/exchange-rates-frontend
