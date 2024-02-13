@@ -5,8 +5,10 @@ import { Currency, ParsedXMLResponse } from "./types";
 const parser = new XMLParser();
 
 export class CBRExchange extends Exchange {
-  API_URL = "http://www.cbr.ru/scripts/XML_daily.asp";
-  NAME = "ЦБ РФ";
+  SITE_URL = "http://www.cbr.ru";
+  API_URL = `${this.SITE_URL}/scripts/XML_daily.asp`;
+  private ALLOWED_CURRENCIES = [Currency.EUR, Currency.GEL, Currency.USD];
+  private MAIN_CURRENCY = Currency.RUB;
 
   private parseRate(rate: string) {
     return Number(parseFloat(rate.replace(",", ".")).toFixed(2));
@@ -45,5 +47,17 @@ export class CBRExchange extends Exchange {
       console.error(err);
       return null;
     }
+  }
+
+  get allowedCurrencies() {
+    return this.ALLOWED_CURRENCIES;
+  }
+
+  get mainCurrency() {
+    return this.MAIN_CURRENCY;
+  }
+
+  get url() {
+    return this.SITE_URL;
   }
 }

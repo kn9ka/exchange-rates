@@ -1,97 +1,31 @@
 import { FastifyInstance } from "fastify";
 import z from "zod";
 
-import {
-  CoronaExchange,
-  CoronaCurrency,
-  ContactExchange,
-  ContactCurrency,
-  CBRExchange,
-  CBRCurrency,
-  ExchangeServiceName,
-} from "../../services/exchanges";
-
-const contactService = new ContactExchange();
-const coronaService = new CoronaExchange();
-const cbrService = new CBRExchange();
-
-export const ratesSchema = {
-  response: {
-    200: z.record(z.record(z.number().nullable().optional())),
-  } as const,
-};
+import { ExchangeServices } from "../../services/exchanges";
 
 export const servicesSchema = {
   response: {
-    200: z.array(z.string()),
+    200: z.record(z.object({ url: z.string() })),
   },
 };
 
 const router = async (fastify: FastifyInstance) => {
   const provider = fastify.zodRouter();
 
-  provider.get("/rates", { schema: ratesSchema }, async (_, reply) => {
-    // @TODO: fix any
-    // const cached = await fastify.abscache.get<any>("rates");
-    // if (cached) {
-    //   return reply.send(cached.item);
-    // }
-
-    try {
-      const rates = {
-        [coronaService.NAME]: {
-          USD: await coronaService.getExchangeRate(
-            CoronaCurrency.RUB,
-            CoronaCurrency.USD
-          ),
-          GEL: await coronaService.getExchangeRate(
-            CoronaCurrency.RUB,
-            CoronaCurrency.GEL
-          ),
-          EUR: await coronaService.getExchangeRate(
-            CoronaCurrency.RUB,
-            CoronaCurrency.EUR
-          ),
-        },
-        [contactService.NAME]: {
-          USD: await contactService.getExchangeRate(
-            ContactCurrency.RUB,
-            ContactCurrency.USD
-          ),
-          GEL: await contactService.getExchangeRate(
-            ContactCurrency.RUB,
-            ContactCurrency.GEL
-          ),
-        },
-        [cbrService.NAME]: {
-          USD: await cbrService.getExchangeRate(
-            CBRCurrency.RUB,
-            CBRCurrency.USD
-          ),
-          GEL: await cbrService.getExchangeRate(
-            CBRCurrency.RUB,
-            CBRCurrency.GEL
-          ),
-          EUR: await cbrService.getExchangeRate(
-            CBRCurrency.RUB,
-            CBRCurrency.EUR
-          ),
-        },
-      };
-
-      await fastify.cache.set("rates", rates, 1000 * 60 * 10);
-
-      reply.send(rates);
-    } catch (err) {
-      if (err instanceof Error) {
-        // @ts-ignore
-        reply.send(err.message);
+  provider.get("/", { schema: servicesSchema }, (_, reply) => {
+    const services = Object.entries(ExchangeServices).reduce<
+      Record<string, { url: string }>
+    >((acc, [key, value]) => {
+      if (acc[key]) {
+        return acc;
       }
-    }
-  });
 
-  provider.get("/services", { schema: servicesSchema }, async (_, reply) => {
-    reply.send(Object.values(ExchangeServiceName));
+      acc[key] = { url: value.url };
+
+      return acc;
+    }, {});
+
+    reply.send(services);
   });
 };
 

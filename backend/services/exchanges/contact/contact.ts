@@ -8,15 +8,16 @@ import {
 } from "./types";
 
 export class ContactExchange extends Exchange {
-  partnerId: string | null = null;
-  accessToken: string | null = null;
-  cookies: string | null = null;
-
   SITE_URL = "https://online.contact-sys.com";
   API_URL = `${this.SITE_URL}/api/contact/v2`;
-  DEFAULT_AMOUNT = "100.00";
-  formId: string | null = null;
-  NAME = "Контакт";
+
+  private partnerId: string | null = null;
+  private accessToken: string | null = null;
+  private cookies: string | null = null;
+  private DEFAULT_AMOUNT = "100.00";
+  private formId: string | null = null;
+  private ALLOWED_CURRENCIES = [Currency.GEL, Currency.USD];
+  private MAIN_CURRENCY = Currency.RUB;
 
   private cleanCookies(cookies: string) {
     const TAIL_REFREST_TOKEN_REGEX = /tokenTailRefresh2=([^;]+)/;
@@ -157,5 +158,17 @@ export class ContactExchange extends Exchange {
       console.error(err);
       return null;
     }
+  }
+
+  get allowedCurrencies() {
+    return this.ALLOWED_CURRENCIES;
+  }
+
+  get mainCurrency() {
+    return this.MAIN_CURRENCY;
+  }
+
+  get url() {
+    return this.SITE_URL;
   }
 }

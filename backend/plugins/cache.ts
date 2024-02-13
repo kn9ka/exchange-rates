@@ -31,7 +31,7 @@ declare module "fastify" {
   interface FastifyInstance {
     abscache: {
       get<T>(key: string): Promise<CacheItem<T>>;
-      set<T>(key: string, value: T): Promise<unknown>;
+      set<T>(key: string, value: T, timeout: number): Promise<unknown>;
     };
   }
 }

@@ -12,7 +12,8 @@ const DEFAULT_SEARCH_PARAMS = {
 export class CoronaExchange extends Exchange {
   SITE_URL = "https://koronapay.com";
   API_URL = `${this.SITE_URL}/transfers/online/api/transfers/tariffs`;
-  NAME = "Золотая корона";
+  private ALLOWED_CURRENCIES = [Currency.GEL, Currency.EUR, Currency.USD];
+  private MAIN_CURRENCY = Currency.RUB;
 
   private parseRate(rate: number) {
     return Number(rate.toFixed(2));
@@ -40,5 +41,17 @@ export class CoronaExchange extends Exchange {
       console.error(err);
       return null;
     }
+  }
+
+  get allowedCurrencies() {
+    return this.ALLOWED_CURRENCIES;
+  }
+
+  get mainCurrency() {
+    return this.MAIN_CURRENCY;
+  }
+
+  get url() {
+    return this.SITE_URL;
   }
 }
