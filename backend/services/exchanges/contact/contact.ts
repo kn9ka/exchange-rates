@@ -67,7 +67,7 @@ export class ContactExchange extends Exchange {
     };
 
     const response = await fetch(url, enrichedRequest);
-
+    console.log(url, response.status);
     this.updateCookies(response.headers.get("Set-Cookie") ?? "");
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -87,10 +87,6 @@ export class ContactExchange extends Exchange {
   }
 
   private async getAccessToken() {
-    if (this.accessToken) {
-      return this.accessToken;
-    }
-
     const url = `${this.API_URL}/auth/token`;
     const request: RequestInit = {
       method: "POST",
