@@ -7,6 +7,8 @@ import {
 } from "./types";
 import { Currency } from "../types";
 
+const TEN_MINUTES = 1000 * 60 * 10;
+
 export class ContactExchange extends Exchange {
   SITE_URL = "https://online.contact-sys.com";
   API_URL = `${this.SITE_URL}/api/contact/v2`;
@@ -24,6 +26,7 @@ export class ContactExchange extends Exchange {
     [Currency.GEL]: "GEL",
     [Currency.EUR]: "EUR",
   };
+  private updated: Date | null = null;
 
   private cleanCookies(cookies: string) {
     const TAIL_REFREST_TOKEN_REGEX = /tokenTailRefresh2=([^;]+)/;
@@ -40,13 +43,6 @@ export class ContactExchange extends Exchange {
 
   private updateCookies(cookies: string) {
     this.cookies = this.cleanCookies(cookies);
-  }
-
-  private async exposePartnerId(text: string) {
-    const TOKEN_REGEX = /window\['ONLINE_PARTNER_ID'\] = "([^"]+)"/;
-    const match = text.match(TOKEN_REGEX);
-    const token = match && match[1];
-    return token;
   }
 
   private parseRate(rate: string) {
@@ -76,16 +72,6 @@ export class ContactExchange extends Exchange {
     return response;
   }
 
-  private async getPartnerId() {
-    if (this.partnerId) {
-      return this.partnerId;
-    }
-    const response = await this.enrichedFetch(this.SITE_URL);
-
-    const text = await response.text();
-    return await this.exposePartnerId(text);
-  }
-
   private async getAccessToken() {
     const url = `${this.API_URL}/auth/token`;
     const request: RequestInit = {
@@ -102,6 +88,28 @@ export class ContactExchange extends Exchange {
     const json = (await response.json()) as AccessTokenResponse;
     this.accessToken = json.accessToken;
     return this.accessToken;
+  }
+
+  private async refreshAccessToken() {
+    const now = new Date();
+
+    if (!this.updated) {
+      this.updated = now;
+    }
+
+    const diff = now.getTime() - this.updated.getTime();
+
+    if (diff < TEN_MINUTES && this.accessToken) {
+      console.log("using previous token: " + this.accessToken);
+      return this.accessToken;
+    }
+
+    this.accessToken = null;
+    console.log("token was cleared: " + this.accessToken);
+    const token = await this.getAccessToken();
+    this.updated = now;
+
+    return token;
   }
 
   private async createExchangeForm(bankCode: BankCode) {
@@ -146,16 +154,9 @@ export class ContactExchange extends Exchange {
     return this.parseRate(json.rate);
   }
 
-  async init() {
-    await this.getPartnerId();
-
-    return await this.getAccessToken();
-  }
-
   async getExchangeRate(currencyIn: typeof Currency.RUB, currency: Currency) {
     try {
-      await this.getPartnerId();
-      await this.getAccessToken();
+      await this.refreshAccessToken();
       await this.createExchangeForm(BankCode.Georgia);
       await this.fillExchangeForm(currency);
       return await this.getRate();

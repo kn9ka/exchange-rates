@@ -6,7 +6,9 @@ import Fastify, { FastifyInstance } from "fastify";
 import closeWithGrace from "close-with-grace";
 
 const app: FastifyInstance = Fastify({
-  logger: true,
+  logger: {
+    level: "error",
+  },
 });
 
 const appService = require("./app");

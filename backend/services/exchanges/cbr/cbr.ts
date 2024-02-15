@@ -41,7 +41,7 @@ export class CBRExchange extends Exchange {
   ) {
     try {
       const response = await fetch(this.API_URL);
-
+      console.log(this.API_URL, response.status);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

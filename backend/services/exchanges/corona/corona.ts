@@ -38,6 +38,8 @@ export class CoronaExchange extends Exchange {
     try {
       const response = await fetch(url);
 
+      console.log(url, response.status);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
