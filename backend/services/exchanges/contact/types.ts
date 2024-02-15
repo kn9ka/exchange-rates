@@ -1,10 +1,4 @@
-export const Currency = {
-  USD: "USD",
-  GEL: "GEL",
-  RUB: "RUB",
-} as const;
-
-export type Currency = (typeof Currency)[keyof typeof Currency];
+import { Currency } from "../types";
 
 export const BankCode = {
   Georgia: "CFRN",

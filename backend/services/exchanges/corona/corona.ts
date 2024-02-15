@@ -1,5 +1,6 @@
 import { Exchange } from "../types";
-import { GetExchangeRateResponse, Currency } from "./types";
+import { GetExchangeRateResponse } from "./types";
+import { Currency } from "../types";
 
 const DEFAULT_SEARCH_PARAMS = {
   receivingCountryId: "GEO",
@@ -12,8 +13,14 @@ const DEFAULT_SEARCH_PARAMS = {
 export class CoronaExchange extends Exchange {
   SITE_URL = "https://koronapay.com";
   API_URL = `${this.SITE_URL}/transfers/online/api/transfers/tariffs`;
-  private ALLOWED_CURRENCIES = [Currency.GEL, Currency.EUR, Currency.USD];
+  private ALLOWED_CURRENCIES = [Currency.GEL, Currency.USD, Currency.EUR];
   private MAIN_CURRENCY = Currency.RUB;
+  private CURRENCY_MAP = {
+    [Currency.RUB]: "810",
+    [Currency.USD]: "840",
+    [Currency.GEL]: "981",
+    [Currency.EUR]: "978",
+  };
 
   private parseRate(rate: number) {
     return Number(rate.toFixed(2));
@@ -21,8 +28,8 @@ export class CoronaExchange extends Exchange {
 
   async getExchangeRate(inCurrency: Currency, outCurrency: Currency) {
     const urlSearchParams = new URLSearchParams({
-      sendingCurrencyId: inCurrency,
-      receivingCurrencyId: outCurrency,
+      sendingCurrencyId: this.CURRENCY_MAP[inCurrency],
+      receivingCurrencyId: this.CURRENCY_MAP[outCurrency],
       ...DEFAULT_SEARCH_PARAMS,
     });
 

@@ -35,7 +35,7 @@ const router = async (fastify: FastifyInstance) => {
       serviceName
     );
 
-    if (cached) {
+    if (cached && Object.values(cached.item).every((v) => v !== null)) {
       return reply.send(cached.item);
     }
 

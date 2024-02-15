@@ -1,12 +1,3 @@
-export const Currency = {
-  RUB: "810",
-  USD: "840",
-  GEL: "981",
-  EUR: "978",
-} as const;
-
-export type Currency = (typeof Currency)[keyof typeof Currency];
-
 export type ExchangeRate = {
   sendingCurrency: {
     id: string;

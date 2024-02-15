@@ -1,14 +1,20 @@
 import { Exchange } from "../types";
 import { XMLParser } from "fast-xml-parser";
-import { Currency, ParsedXMLResponse } from "./types";
-
+import { ParsedXMLResponse } from "./types";
+import { Currency } from "../types";
 const parser = new XMLParser();
 
 export class CBRExchange extends Exchange {
   SITE_URL = "http://www.cbr.ru";
   API_URL = `${this.SITE_URL}/scripts/XML_daily.asp`;
-  private ALLOWED_CURRENCIES = [Currency.EUR, Currency.GEL, Currency.USD];
+  private ALLOWED_CURRENCIES = [Currency.GEL, Currency.USD, Currency.EUR];
   private MAIN_CURRENCY = Currency.RUB;
+  private CURRENCY_MAP = {
+    [Currency.RUB]: "RUB",
+    [Currency.USD]: "USD",
+    [Currency.GEL]: "GEL",
+    [Currency.EUR]: "EUR",
+  };
 
   private parseRate(rate: string) {
     return Number(parseFloat(rate.replace(",", ".")).toFixed(2));
@@ -41,7 +47,7 @@ export class CBRExchange extends Exchange {
       }
       const text = await response.text();
       const rates = await this.parseXML(text);
-      return rates[currencyOut];
+      return rates[this.CURRENCY_MAP[currencyOut]];
     } catch (err) {
       // @TODO: log error
       console.error(err);

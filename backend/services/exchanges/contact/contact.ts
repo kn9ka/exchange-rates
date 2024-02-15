@@ -3,21 +3,27 @@ import {
   AccessTokenResponse,
   BankCode,
   CreateExchangeFormResponse,
-  Currency,
   GetFeeResponse,
 } from "./types";
+import { Currency } from "../types";
 
 export class ContactExchange extends Exchange {
   SITE_URL = "https://online.contact-sys.com";
   API_URL = `${this.SITE_URL}/api/contact/v2`;
 
-  private partnerId: string | null = null;
+  private partnerId: string | null = "D5267BED-18CC-4661-B03A-65934CAE1CA4";
   private accessToken: string | null = null;
   private cookies: string | null = null;
   private DEFAULT_AMOUNT = "100.00";
   private formId: string | null = null;
   private ALLOWED_CURRENCIES = [Currency.GEL, Currency.USD];
   private MAIN_CURRENCY = Currency.RUB;
+  private CURRENCY_MAP = {
+    [Currency.RUB]: "RUB",
+    [Currency.USD]: "USD",
+    [Currency.GEL]: "GEL",
+    [Currency.EUR]: "EUR",
+  };
 
   private cleanCookies(cookies: string) {
     const TAIL_REFREST_TOKEN_REGEX = /tokenTailRefresh2=([^;]+)/;
@@ -36,7 +42,7 @@ export class ContactExchange extends Exchange {
     this.cookies = this.cleanCookies(cookies);
   }
 
-  private exposePartnerId(text: string) {
+  private async exposePartnerId(text: string) {
     const TOKEN_REGEX = /window\['ONLINE_PARTNER_ID'\] = "([^"]+)"/;
     const match = text.match(TOKEN_REGEX);
     const token = match && match[1];
@@ -48,19 +54,21 @@ export class ContactExchange extends Exchange {
   }
 
   private async enrichedFetch(url: string, request: RequestInit = {}) {
-    const enrichedRequest = {
+    let enrichedRequest = {
       ...request,
       headers: {
         "Content-Type": "application/json",
-        authorization: `SplitTokenV2 ${this.accessToken}`,
         Cookie: this.cookies ?? "",
+        ...(this.accessToken
+          ? { authorization: `SplitTokenV2 ${this.accessToken}` }
+          : {}),
         ...(request.headers ?? {}),
       },
     };
+
     const response = await fetch(url, enrichedRequest);
 
     this.updateCookies(response.headers.get("Set-Cookie") ?? "");
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -69,14 +77,20 @@ export class ContactExchange extends Exchange {
   }
 
   private async getPartnerId() {
+    if (this.partnerId) {
+      return this.partnerId;
+    }
     const response = await this.enrichedFetch(this.SITE_URL);
 
     const text = await response.text();
-    this.partnerId = this.exposePartnerId(text);
-    return this.partnerId;
+    return await this.exposePartnerId(text);
   }
 
   private async getAccessToken() {
+    if (this.accessToken) {
+      return this.accessToken;
+    }
+
     const url = `${this.API_URL}/auth/token`;
     const request: RequestInit = {
       method: "POST",
@@ -117,7 +131,7 @@ export class ContactExchange extends Exchange {
       method: "PUT",
       body: JSON.stringify({
         trnAmount: `${this.DEFAULT_AMOUNT}`,
-        trnCurrency: currency,
+        trnCurrency: this.CURRENCY_MAP[currency],
       }),
     };
 
@@ -137,19 +151,15 @@ export class ContactExchange extends Exchange {
   }
 
   async init() {
-    const partnerId = await this.getPartnerId();
+    await this.getPartnerId();
 
-    if (partnerId) {
-      await this.getAccessToken();
-    }
+    return await this.getAccessToken();
   }
 
   async getExchangeRate(currencyIn: typeof Currency.RUB, currency: Currency) {
     try {
-      if (!this.partnerId) {
-        await this.init();
-      }
-
+      await this.getPartnerId();
+      await this.getAccessToken();
       await this.createExchangeForm(BankCode.Georgia);
       await this.fillExchangeForm(currency);
       return await this.getRate();

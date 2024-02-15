@@ -9,7 +9,7 @@ export const ExchangeServices: Record<ExchangeServiceName, Exchange> = {
   [ExchangeServiceName.Contact]: new ContactExchange(),
 };
 
-export { CBRExchange, Currency as CBRCurrency } from "./cbr";
-export { ContactExchange, Currency as ContactCurrency } from "./contact";
-export { CoronaExchange, Currency as CoronaCurrency } from "./corona";
+export { CBRExchange } from "./cbr";
+export { ContactExchange } from "./contact";
+export { CoronaExchange } from "./corona";
 export * from "./types";

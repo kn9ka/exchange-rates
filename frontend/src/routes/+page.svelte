@@ -1,16 +1,13 @@
 <script lang="ts">
-	type ExchangeRate = Record<string, number>;
-	type RatesResponse = Record<string, ExchangeRate>;
 	import ExchangeCard from '../components/ExchangeCard/ExchangeCard.svelte';
 	import { onMount } from 'svelte';
-	import { ratesStore } from './store';
+	import type { ExchangesResponse } from './types';
+	import { Exchanges } from './constants';
 
-	let rates: RatesResponse = {};
-	ratesStore.subscribe((items) => (rates = items));
+	let services: ExchangesResponse;
 
-	const load = async (): Promise<RatesResponse> => {
-		const prefix = process.env.NODE_ENV !== 'production' ? 'http://localhost:3000/' : '';
-		const response = await fetch(`${prefix}api/exchanges/rates`);
+	const fetchServiceNames = async (): Promise<ExchangesResponse> => {
+		const response = await fetch(`/api/exchanges`);
 		if (!response.ok) {
 			// @TODO: do stuff
 			console.error('something went wrong');
@@ -18,20 +15,25 @@
 		return await response.json();
 	};
 
+	const checkServiceName = (serviceName: string): serviceName is Exchanges => {
+		return Object.values(Exchanges).includes(serviceName as Exchanges);
+	};
 	onMount(async () => {
-		ratesStore.set(await load());
+		services = await fetchServiceNames();
 	});
 </script>
 
 <svelte:head>
 	<title>Exchange rates</title>
-	<meta name="description" content="Exchange rates" />
+	<meta name="description" content="Exchange rates for Zolotaya Korona and Contact" />
 </svelte:head>
 
 <section class="flex h-full flex-1 flex-col justify-center gap-4">
 	<div class="flex h-full flex-wrap place-content-center gap-4">
-		{#each Object.entries(rates) as [name, exchangeRates]}
-			<ExchangeCard cardName={name} rates={exchangeRates} />
+		{#each Object.entries(services || {}) as [serviceName, values]}
+			{#if checkServiceName(serviceName)}
+				<ExchangeCard {serviceName} url={values.url} />
+			{/if}
 		{/each}
 	</div>
 </section>
