@@ -58,6 +58,6 @@ jobs:
           port:
           script: |
             docker pull knyaka/exchange-rates-backend:latest
-            docker stop backend
-            docker remove backend
-            docker run -d -p 3000:3000 --name backend knyaka/exchange-rates-backend:latest
+            docker stop exchange-rates-backend
+            docker remove exchange-rates-backend
+            docker run -d --network backend --name exchange-rates-backend knyaka/exchange-rates-backend:latest
