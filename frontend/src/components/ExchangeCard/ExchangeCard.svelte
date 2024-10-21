@@ -11,7 +11,7 @@
 	let isLoading = false;
 
 	const fetchServiceRates = async () => {
-		const response = await fetch(`/api/exchanges/${serviceName}/rates`);
+		const response = await fetch(`https://api.knyaka.dev/exchanges/${serviceName}/rates`);
 
 		if (!response.ok) {
 			// @TODO: do stuff

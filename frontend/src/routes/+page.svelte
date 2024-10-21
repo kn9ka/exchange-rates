@@ -7,7 +7,7 @@
 	let services: ExchangesResponse;
 
 	const fetchServiceNames = async (): Promise<ExchangesResponse> => {
-		const response = await fetch(`/api/exchanges`);
+		const response = await fetch(`https://api.knyaka.dev/exchanges`);
 		if (!response.ok) {
 			// @TODO: do stuff
 			console.error('something went wrong');
